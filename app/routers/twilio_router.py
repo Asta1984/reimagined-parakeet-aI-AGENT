@@ -3,8 +3,7 @@ from twilio.twiml.voice_response import VoiceResponse
 from app.services.telephony import TelephonyService
 from app.services.stt import STTService
 from app.services.tts import TTSService
-# Change this import
-from app.agents.sales_agent import MistralAgent
+from app.agents.sales_agent import BaseAgent
 from app.utils.logger import ConversationLogger
 
 router = APIRouter()
@@ -14,8 +13,7 @@ async def handle_twilio_webhook(request: Request):
     try:
         # Initialize call handling
         call = TelephonyService.handle_incoming_call(request)
-        # Use MistralAgent instead of SalesAgent
-        agent = MistralAgent()
+        agent = BaseAgent()
         
         # Start conversation
         call.start_conversation(
