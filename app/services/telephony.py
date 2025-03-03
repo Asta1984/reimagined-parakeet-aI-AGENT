@@ -1,4 +1,4 @@
-from vocode.streaming.telephony.twilio import TwilioCall, TwilioConfig
+from vocode.streaming.models.telephony import TwilioCall, TwilioConfig
 from app.config.settings import settings
 
 class TelephonyService:

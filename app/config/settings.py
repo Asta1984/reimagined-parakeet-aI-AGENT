@@ -1,13 +1,11 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    TWILIO_ACCOUNT_SID: str
-    TWILIO_AUTH_TOKEN: str
-    TWILIO_PHONE_NUMBER: str
-    DEEPGRAM_API_KEY: str
-    ELEVENLABS_API_KEY: str
-    MISTRAL_API_KEY: str
-    ELEVENLABS_VOICE_ID: str = "EXAVITQu4vr4xnSDxMaL"
+    mistral_api_key: str
+    deepgram_api_key: str
+    elevenlabs_api_key: str
+    twilio_account_sid: str
+    twilio_auth_token: str
     
     class Config:
         env_file = ".env"

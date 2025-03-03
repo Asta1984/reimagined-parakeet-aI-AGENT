@@ -10,3 +10,4 @@ class STTService:
             audio_encoding="mulaw",
             endpointing_config={"timeout_seconds": 1.0}
         )
+    
