@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+venv/
+.env
+.env.local
+.pytest_cache/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Compiled files
+*.pyc
+*.so
+*.dll
+*.exe
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Local development files
+local_settings.py
+*.local
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Output files
+output/
+results/
+*.wav
+*.mp3
+
+# Misc
+*.bak
+*.tmp
+*.cache

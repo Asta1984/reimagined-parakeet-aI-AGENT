@@ -1,0 +1,13 @@
+vocode
+twilio
+deepgram-sdk
+elevenlabs
+mistralai
+openai
+pyaudio
+fastapi
+uvicorn
+python-dotenv
+requests
+websockets
+sounddevice
