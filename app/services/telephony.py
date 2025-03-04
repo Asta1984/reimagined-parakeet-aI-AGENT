@@ -1,25 +1,20 @@
 # app/services/telephony_service.py
-from vocode.streaming.models.agent import AgentConfig, LLMAgentConfig
+from vocode.streaming.models.agent import LLMAgentConfig
 from vocode.streaming.models.telephony import TwilioConfig
 from vocode.streaming.telephony.conversation.outbound_call import OutboundCall
 from vocode.streaming.telephony.conversation.twilio_phone_conversation import TwilioPhoneConversation
 from vocode.streaming.telephony.config_manager.redis_config_manager import RedisConfigManager
 from app.agents.vocode_sales_agent import VocodeSalesAgent
 from app.config.settings import settings
-from app.agents.sales_agent import SalesAgent
 import redis
 import logging
+from app.agents.sales_agent import SalesAgent
 
 class MistralAgentConfig(LLMAgentConfig):
+    model_name: str = "mistral-custom"
+    
     class Config:
         arbitrary_types_allowed = True
-        
-    def __init__(self, **kwargs):
-        super().__init__(
-            prompt_preamble=SalesAgent.SYSTEM_PROMPT,
-            model_name="mistral-custom",
-            **kwargs
-        )
 
 class TelephonyService:
     def __init__(self, base_url: str):
@@ -39,6 +34,13 @@ class TelephonyService:
         
         # Use custom Mistral config
         self.agent_config = MistralAgentConfig(
+            initial_message=None,
+            temperature=0.7,
+            max_tokens=256
+        )
+
+        self.agent_config = MistralAgentConfig(
+            prompt_preamble=SalesAgent.SYSTEM_PROMPT,
             initial_message=None,
             temperature=0.7,
             max_tokens=256

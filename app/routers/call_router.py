@@ -2,12 +2,13 @@
 from fastapi import APIRouter, HTTPException, Request
 from app.services.telephony import TelephonyService
 from app.config.settings import settings
+from app.utils.responses import XMLResponse
 import logging
 
 router = APIRouter()
 logger = logging.getLogger("CallRouter")
 
-@router.post("/inbound-call")
+@router.post("/inbound-call", response_class=XMLResponse)
 async def handle_inbound_call(request: Request):
     try:
         form_data = await request.form()
@@ -26,8 +27,8 @@ async def handle_inbound_call(request: Request):
             call_sid, from_number, to_number
         )
         
-        return twiml_response
-    
+        return XMLResponse(twiml_response)
+        
     except Exception as e:
         logger.error(f"Inbound call error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

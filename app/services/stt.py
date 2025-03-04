@@ -12,8 +12,9 @@ class STTService:
                 api_key=settings.DEEPGRAM_API_KEY,
                 sampling_rate=8000,
                 audio_encoding="mulaw",
-                endpointing_config={"timeout_seconds": 1.0}
-            )
+                endpointing_config={"timeout_seconds": 1.0},
+                downsampling=16000  # Add this line
+)
         except Exception as e:
             logger.error(f"Error creating transcriber: {e}")
             raise

@@ -1,10 +1,13 @@
-# app/agents/sales_agent.py
-from mistralai.client import MistralClient
+        # app/agents/sales_agent.py
+from mistralai.async_client import MistralAsyncClient
+from mistralai.models.chat_completion import ChatMessage
 from app.config.settings import settings
 import logging
+import asyncio
 
 class SalesAgent:
-    SYSTEM_PROMPT = """
+    class SalesAgent:
+        SYSTEM_PROMPT = """
     You are a professional sales agent. Your objectives:
     1. Build rapport quickly
     2. Ask insightful, open-ended questions
@@ -16,22 +19,21 @@ class SalesAgent:
     
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.mistral_client = MistralClient(api_key=settings.MISTRAL_API_KEY)
+        self.mistral_client = MistralAsyncClient(api_key=settings.MISTRAL_API_KEY)
         self.conversation_history = [
-            {"role": "system", "content": self.SYSTEM_PROMPT}
+            ChatMessage(role="system", content=self.SYSTEM_PROMPT)
         ]
     
-    def generate_response(self, user_input: str) -> str:
+    async def generate_response(self, user_input: str) -> str:
         try:
-            self.conversation_history.append({"role": "user", "content": user_input})
-            response = self.mistral_client.chat(
+            self.conversation_history.append(ChatMessage(role="user", content=user_input))
+            response = await self.mistral_client.chat(
                 model=settings.MISTRAL_MODEL,
                 messages=self.conversation_history
             )
             ai_response = response.choices[0].message.content
-            self.conversation_history.append({"role": "assistant", "content": ai_response})
+            self.conversation_history.append(ChatMessage(role="assistant", content=ai_response))
             return ai_response
         except Exception as e:
             self.logger.error(f"Error generating response: {e}")
             return "I'm having trouble connecting to the system. Could you please repeat that?"
-
