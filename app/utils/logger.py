@@ -1,20 +1,14 @@
+# app/utils/logger.py
 import logging
-import json
-from datetime import datetime
+from app.config.settings import settings
 
 def setup_logging():
+    """Configure logging for the application"""
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        level=getattr(logging, settings.LOG_LEVEL.upper()),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler('sales_voice_agent.log')
+        ]
     )
-
-class ConversationLogger:
-    @staticmethod
-    def log_interaction(phone: str, input: str, output: str):
-        entry = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "phone": phone,
-            "input": input,
-            "output": output
-        }
-        logging.info(json.dumps(entry))
