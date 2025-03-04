@@ -12,17 +12,15 @@ You are a professional sales agent. Follow these rules:
 """
 
 class MistralAgent(BaseAgent):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, agent_config):  # Accept agent_config
+        super().__init__(agent_config=agent_config)  # Pass to parent
         self.client = Mistral(api_key=settings.MISTRAL_API_KEY)
-        self.model = "mistral-small-latest"
+        self.model = agent_config.get("model", "mistral-small-latest")  # Use config value
         self.messages = [{"role": "system", "content": SALES_SYSTEM_PROMPT}]
     
     async def respond(self, human_input, conversation_id=None, is_interrupt=False):
-        # Add user message
         self.messages.append({"role": "user", "content": human_input})
         
-        # Get response using the streaming API
         full_response = ""
         response_stream = await self.client.chat.stream_async(
             model=self.model,
@@ -33,9 +31,7 @@ class MistralAgent(BaseAgent):
             if chunk.data.choices[0].delta.content is not None:
                 full_response += chunk.data.choices[0].delta.content
         
-        # Add assistant message to conversation history
         self.messages.append({"role": "assistant", "content": full_response})
-        
         return full_response
     
     async def handle_error(self, error):

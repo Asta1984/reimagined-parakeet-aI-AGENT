@@ -10,16 +10,11 @@ import asyncio
 import json
 from app.utils.responses import XMLResponse
 
-
 router = APIRouter()
 
-# Dependency to get telephony service
 async def get_telephony_service():
-    # Initialize with base URL and config manager
-    # This is a simplified example - you would need to set up your Redis config manager
     base_url = "https://9511-14-139-241-69.ngrok-free.app"
-    # For demo purposes, using a mock config manager
-    config_manager = None  # Replace with actual Redis config manager
+    config_manager = None
     return TelephonyService(base_url=base_url, config_manager=config_manager)
 
 @router.post("/twilio-webhook")
@@ -27,56 +22,78 @@ async def handle_twilio_webhook(
     request: Request,
     telephony_service: TelephonyService = Depends(get_telephony_service)
 ):
-    """Handle incoming Twilio calls and direct them to the conversation handler"""
+    """Handle incoming Twilio calls"""
     try:
-        # Process the form data
         form_data = await request.form()
-        
-        # Extract call details
         call_sid = form_data.get("CallSid")
         from_number = form_data.get("From")
-        to_number = form_data.get("To")
         
         if not call_sid or not from_number:
-            raise HTTPException(status_code=400, detail="Missing required Twilio parameters")
-        
-        # Log the incoming call
+            raise HTTPException(status_code=400, detail="Missing parameters")
+
         ConversationLogger.log_interaction(
             phone=from_number,
             input="Call initiated",
             output="Processing incoming call"
         )
-        
-        # Initialize the agent
-        agent = MistralAgent()
-        
-        # Create agent config (simplified for this example)
+
+        # Create config FIRST
         agent_config = {
             "type": "mistral_agent",
             "model": "mistral-tiny"
         }
         
-        # Handle the call using telephony service
+        # Initialize agent WITH CONFIG
+        agent = MistralAgent(agent_config=agent_config)
+
         twiml_response = await telephony_service.handle_inbound_call(
             request=request,
             agent_config=agent_config
         )
-        
-        # Return TwiML response with correct content type
+
         return Response(content=twiml_response, media_type="application/xml")
         
     except Exception as e:
-        # Log the error
         ConversationLogger.log_interaction(
-            phone=form_data.get("From", "unknown") if 'form_data' in locals() else "unknown",
+            phone=form_data.get("From", "unknown"),
             input="Error in webhook",
             output=f"Error: {str(e)}"
         )
-        
-        # Create error response
         response = VoiceResponse()
-        response.say("We're sorry, but we're experiencing technical difficulties. Please try again later.")
+        response.say("Technical difficulties. Please try again later.")
         return Response(content=str(response), media_type="application/xml")
+
+@router.post("/outbound-call")
+async def initiate_outbound_call(
+    to_phone: str,
+    telephony_service: TelephonyService = Depends(get_telephony_service)
+):
+    """Initiate outbound call"""
+    try:
+        # Create config FIRST
+        agent_config = {
+            "type": "mistral_agent",
+            "model": "mistral-tiny"
+        }
+        
+        # Initialize agent WITH CONFIG
+        agent = MistralAgent(agent_config=agent_config)
+
+        conversation_id = await telephony_service.make_outbound_call(
+            to_phone=to_phone,
+            from_phone=settings.TWILIO_PHONE_NUMBER,
+            agent_config=agent_config
+        )
+
+        return {"status": "success", "conversation_id": conversation_id}
+        
+    except Exception as e:
+        ConversationLogger.log_interaction(
+            phone=to_phone,
+            input="Outbound call request",
+            output=f"Error: {str(e)}"
+        )
+        raise HTTPException(status_code=500, detail=f"Failed to initiate call: {str(e)}")
 
 @router.post("/call-status")
 async def handle_call_status(
