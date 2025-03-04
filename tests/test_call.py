@@ -10,17 +10,17 @@ account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
 auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
 twilio_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
-# Your ngrok URL
-webhook_url = "https://c53b-2409-4081-8783-3752-8172-1894-882e-a85a.ngrok-free.app/api/v1/twilio-webhook"
+# Your ngrok URL (pointing to your server's endpoint)
+webhook_url = "https://9511-14-139-241-69.ngrok-free.app/api/v1/twilio-webhook"
 
 # Initialize Twilio client
 client = Client(account_sid, auth_token)
 
 # Create a test call
 call = client.calls.create(
-    url=webhook_url,  # This is simpler than using TwiML directly
+    url=webhook_url,  # This URL returns the TwiML instructions for the call
     from_=twilio_number,
-    to="+917067456439",  # Your verified phone number
+    to="+917067456439",  # Your verified Indian phone number
     method="POST"
 )
 

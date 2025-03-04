@@ -1,6 +1,7 @@
 from vocode.streaming.agent import BaseAgent
 from mistralai import Mistral
 from app.config.settings import settings
+import asyncio
 
 SALES_SYSTEM_PROMPT = """
 You are a professional sales agent. Follow these rules:
@@ -21,17 +22,21 @@ class MistralAgent(BaseAgent):
         # Add user message
         self.messages.append({"role": "user", "content": human_input})
         
-        # Get response using the new API format
-        response = await self.client.chat.complete_async(
+        # Get response using the streaming API
+        full_response = ""
+        response_stream = await self.client.chat.stream_async(
             model=self.model,
             messages=self.messages,
         )
         
-        # Add assistant message
-        assistant_message = response.choices[0].message.content
-        self.messages.append({"role": "assistant", "content": assistant_message})
+        async for chunk in response_stream:
+            if chunk.data.choices[0].delta.content is not None:
+                full_response += chunk.data.choices[0].delta.content
         
-        return assistant_message
+        # Add assistant message to conversation history
+        self.messages.append({"role": "assistant", "content": full_response})
+        
+        return full_response
     
     async def handle_error(self, error):
-        return "Sorry, I'm having trouble. Please try again later."
+        return f"Sorry, I'm having trouble. Error: {str(error)[:50]}. Please try again later."
